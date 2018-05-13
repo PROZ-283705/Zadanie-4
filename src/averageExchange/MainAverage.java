@@ -2,6 +2,9 @@ package averageExchange;
 
 import java.io.StringReader;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -42,20 +45,23 @@ public class MainAverage {
 	@Produces(MediaType.TEXT_HTML)
 	@Path("{tableChar}/{currencyCode}/{topCount}")
 	public String getHtml(@PathParam("tableChar") String tableChar, @PathParam("currencyCode") String currencyCode, @PathParam("topCount") Integer topCount) {
-		return "<html><body><h1>Average rate</h1><p>Average rate for "+currencyCode+" calculated for the last "+topCount+" days is equal to: "+getAverage(tableChar,currencyCode,topCount)+" PLN</p></body></html>";
+		return "<html><body><h1>Average rate</h1><p>Average rate for "+currencyCode+" calculated from table "+tableChar+" for the last "+topCount+" days is equal to: "+getAverage(tableChar,currencyCode,topCount)+" PLN</p></body></html>";
 	}
 
 	@GET
 	@Path("{tableChar}/{currencyCode}/{topCount}")
 	@Produces(MediaType.TEXT_XML)
 	public String getXML(@PathParam("tableChar") String tableChar, @PathParam("currencyCode") String currencyCode, @PathParam("topCount") Integer topCount) {
-		return "<?xml version=\"1.0\"?>" + "<avg>"+getAverage(tableChar,currencyCode,topCount)+"</avg>";
+		return "<?xml version=\"1.0\"?>" + "<code>"+currencyCode+"</code>"+"<table>"+tableChar+"</table>"+"<topCount>"+topCount+"</topCount>"+"<avg>"+getAverage(tableChar,currencyCode,topCount)+"</avg>";
 	}
 	
 	@GET
 	@Path("{tableChar}/{currencyCode}/{topCount}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getJSON(@PathParam("tableChar") String tableChar, @PathParam("currencyCode") String currencyCode, @PathParam("topCount") Integer topCount) {
-		return "{\"average\":" + getAverage(tableChar,currencyCode,topCount)+"}";
+		JsonObjectBuilder objBuilder = Json.createObjectBuilder();
+		objBuilder.add("table", tableChar).add("topCount", topCount).add("code", currencyCode).add("average", getAverage(tableChar,currencyCode,topCount));
+		JsonObject jsonObj = objBuilder.build();
+		return jsonObj.toString();
 	}
 }
